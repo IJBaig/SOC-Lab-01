@@ -4,7 +4,7 @@
 ---
 
 ## Overview (What you built)
-The goate is to create a SOC Detection lab from scrach. A basic Lab that will show alerts about login failure, sccessful logins, sysmon Process images and powershell execution on windows system.
+The goal is to create a SOC Detection lab from scrach. A basic Lab that will show alerts about login failure, sccessful logins, sysmon Process images and powershell execution on windows system.
 
 ### Architecture
 - **Windows 10**
@@ -67,7 +67,7 @@ Create a windows 10 virtual machine based on specified options
         - Lower Bound Address `192.168.56.101`
         - Upper Address Bound `192.168.56.254`
 - Start The Windows machine 
-
+<img  src=./win10configuration.png><br>
 ### 4: Install and Run Sysmon And Forwarder
 #### Sysmon
 Sysmon provides high-signal telemetry (process creation, network connections, etc.) that improves SOC detections.
@@ -103,15 +103,23 @@ Sysmon provides high-signal telemetry (process creation, network connections, et
 On Kali:
 
 1. Start Splunk:
-   - ```bash sudo /opt/splunk/bin/splunk start```
+   - ```bash
+     sudo /opt/splunk/bin/splunk start
+     ```
 2. Enable receiver:
-   - ```bash sudo /opt/splunk/bin/splunk enable listen 9997```
+   - ```bash
+     sudo /opt/splunk/bin/splunk enable listen 9997
+     ```
 
 3. Restart Splunk (recommended):
-   - ```bash sudo /opt/splunk/bin/splunk restart```
+   - ```bash
+     sudo /opt/splunk/bin/splunk restart
+     ```
 
 4. Verify Splunk is listening on 9997:
-   - ```bash sudo ss -lntp | grep 9997```
+   - ```bash
+     sudo ss -lntp | grep 9997
+     ```
 
 Expected: `splunkd` listening on `0.0.0.0:9997` (or Kali’s IP).
 
@@ -126,7 +134,9 @@ In Splunk Web:
 3. Save
 
 Verification search:
-- `index=win10 | head 5`
+- ```bash
+  index=win10 | head 5
+  ```
 
 ---
 
@@ -134,7 +144,9 @@ Verification search:
 On Windows (Admin CMD):
 
 1. Verify the forward-server config:
-   - ```bash splunk list forward-server```
+   - ```bash
+     splunk list forward-server
+     ```
 
 Expected:
 - **Active forwards:** `192.168.56.1:9997`
@@ -142,31 +154,48 @@ Expected:
 ## Data inventory
 
 **Count by sourcetype:**
-- `index=win10 earliest=-24h | stats count by sourcetype | sort -count`
+- ```bash
+  index=win10 earliest=-24h | stats count by sourcetype | sort -count```
 
 **Count by host and sourcetype:**
-- `index=win10 earliest=-24h | stats count by host sourcetype | sort -count`
+- ```bash
+  index=win10 earliest=-24h | stats count by host sourcetype | sort -count
+  ```
 
 **Failed logons (4625):**
-- `index=win10 sourcetype=WinEventLog:Security EventCode=4625 earliest=-24h | stats count by Account_Name Source_Network_Address host | sort -count`
+- ```bash
+  index=win10 sourcetype=WinEventLog:Security EventCode=4625 earliest=-24h | stats count by Account_Name Source_Network_Address host | sort -count
+  ```
 
 **Successful logons (4624):**
-- `index=win10 sourcetype=WinEventLog:Security EventCode=4624 earliest=-24h | stats count by Account_Name Logon_Type host | sort -count`
+- ```bash
+  index=win10 sourcetype=WinEventLog:Security EventCode=4624 earliest=-24h | stats count by Account_Name Logon_Type host | sort -count
+  ```
 
 **New local user created (4720):**
-- `index=win10 sourcetype=WinEventLog:Security EventCode=4720 earliest=-7d | table _time host SubjectUserName TargetUserName Message`
+- ```bash
+  index=win10 sourcetype=WinEventLog:Security EventCode=4720 earliest=-7d | table _time host SubjectUserName TargetUserName Message
+  ```
 
 **If Security process creation is enabled (4688):**
-- `index=win10 sourcetype=WinEventLog:Security EventCode=4688 earliest=-24h | table _time host Account_Name New_Process_Name Process_Command_Line Parent_Process_Name | head 50`
+- ```bash
+  index=win10 sourcetype=WinEventLog:Security EventCode=4688 earliest=-24h | table _time host Account_Name New_Process_Name Process_Command_Line Parent_Process_Name | head 50
+  ```
 
 **Sysmon process creation (Event ID 1):**
-- `index=win10 sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 earliest=-24h | table _time host Image CommandLine ParentImage User | head 50`
+- ```bash
+  index=win10 sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 earliest=-24h | table _time host Image CommandLine ParentImage User | head 50
+  ```
 
 **Sysmon network connections (Event ID 3):**
-- `index=win10 sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=3 earliest=-24h | stats count by DestinationIp Image | sort -count | head 20`
+- ```bash
+  index=win10 sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=3 earliest=-24h | stats count by DestinationIp Image | sort -count | head 20
+  ```
 
 **Works best with Sysmon Event ID 1 or Security 4688:**
-- `index=win10 earliest=-24h (powershell OR pwsh) | table _time host sourcetype EventCode Message | head 50`
+- ```bash
+  index=win10 earliest=-24h (powershell OR pwsh) | table _time host sourcetype EventCode Message | head 50
+  ```
 
 ---
 
@@ -191,15 +220,11 @@ A single SOC overview dashboard for Windows telemetry:
 In Splunk Web:
 1. Open **Dashboards**
 2. **Create New Dashboard**
-3. Choose Classic or Dashboard Studio (your preference)
-4. Add panels using searches from Section 5
-5. **Placeholder:** *(Add your dashboard source here)*
+3. Choose Classic and create
+4. Edit -> souece
+5. paste the xml from [Dashboard.xml](./dashboard.xml)
+6. save
 
 ---
-## 8) Quick Checklist (Success Criteria)
-
-- [ ] Kali: receiver enabled on **9997**
-- [ ] Windows: UF configured and shows **Active forward**
-- [ ] Splunk Web: `index=win10` returns events
-- [ ] Dashboard panels populate (at least Security/System/Application)
-- [ ] (Optional) Sysmon panels populate after Sysmon is installed + forwarded
+<img src=./dashboard02.png>
+<img src=./Dashboard01.png>
