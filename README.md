@@ -89,7 +89,7 @@ Sysmon provides high-signal telemetry (process creation, network connections, et
   - Just set username and Password and Click continue. we wil set the rest later (we can set it rightnow but lets just do it via files it is fun)
   -  goto This Location
     - `C:\Program Files\SplunkUniversalForwarder\etc\system\local\`
-    - Move the Files [input.cong](./input.conf) and [output.conf](./output.conf) here.
+    - Move the Files [inputs.cong](./inputs.conf) and [outputs.conf](./outputs.conf) here.
   - open CMD as Administrator
     - ```bash
       cd C:\Program Files\SplunkUniversalForwarder\bin
@@ -98,7 +98,7 @@ Sysmon provides high-signal telemetry (process creation, network connections, et
       splunk list forward-server
       ```
     - enter username and password for forwarder
-    - it will show inactive server `192.168.1.56.1:9997`
+    - it will show inactive server `192.168.56.1:9997`
       
 ### 5 Kali: Enable Splunk receiver on port 9997
 On Kali:
