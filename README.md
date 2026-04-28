@@ -1,8 +1,8 @@
 # SOC Lab (Splunk UF + WinEventLog + Dashboard)
 
 **Date:** 2026-04-28
-I am using splunk for more then 6 months andI use it for log traversal simply ingesting the log file and reading traversing capturing the flag etc but why stop here. not a stop but a Huge pause so I decided to Built a Small project just an integration of Splunk forwarder with sysmon. Took a whole day to finish it in a constant cycle of motivatino and laziness. So here is a step by step Guide on how to do it yourself
----
+<p> I am using splunk for more then 6 months and I use it for log traversal simply ingesting the log file and reading, traversing and capturing the flag etc but why stop here. not a stop but a Huge pause so I decided to Built a Small project just an integration of Splunk forwarder with sysmon. Took a whole day to finish it in a constant cycle of motivatino and laziness. So here is a step by step Guide on how to do it yourself. </p>
+
 
 ## Overview (What you built)
 The goal is to create a SOC Detection lab from scrach. A basic Lab that will show alerts about login failure, sccessful logins, sysmon Process images and powershell execution on windows system.
