@@ -227,5 +227,6 @@ In Splunk Web:
 6. save
 
 ---
-<img src=./dashboard02.png>
+
 <img src=./Dashboard01.png>
+<img src=./dashboard02.png>
