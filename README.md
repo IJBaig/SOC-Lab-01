@@ -89,7 +89,7 @@ Sysmon provides high-signal telemetry (process creation, network connections, et
   - Just set username and Password and Click continue. we wil set the rest later (we can set it rightnow but lets just do it via files it is fun)
   -  goto This Location
     - `C:\Program Files\SplunkUniversalForwarder\etc\system\local\`
-    - Move the Files [inputs.cong](./inputs.conf) and [outputs.conf](./outputs.conf) here.
+    - Move the Files [inputs.conf](./inputs.conf) and [outputs.conf](./outputs.conf) here.
   - open CMD as Administrator
     - ```bash
       cd C:\Program Files\SplunkUniversalForwarder\bin
