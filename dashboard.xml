@@ -1,0 +1,129 @@
+<dashboard version="1.1" theme="dark">
+  <label>SOC - Win10 Overview</label>
+  <description>Windows 10 SOC overview: auth, Sysmon, processes, network, and PowerShell hunting.</description>
+
+  <fieldset submitButton="false">
+    <input type="time" token="time">
+      <label>Time Range</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+
+  <row>
+    <panel>
+      <title>Total Events</title>
+      <single>
+        <search>
+          <query>index=win10 earliest=$time.earliest$ latest=$time.latest$ | stats count as total_events</query>
+        </search>
+      </single>
+    </panel>
+
+    <panel>
+      <title>Hosts</title>
+      <single>
+        <search>
+          <query>index=win10 earliest=$time.earliest$ latest=$time.latest$ | stats dc(host) as hosts</query>
+        </search>
+      </single>
+    </panel>
+
+    <panel>
+      <title>Failed Logons (4625)</title>
+      <single>
+        <search>
+          <query>index=win10 sourcetype=WinEventLog:Security EventCode=4625 earliest=$time.earliest$ latest=$time.latest$ | stats count as failed_logons</query>
+        </search>
+      </single>
+    </panel>
+
+    <panel>
+      <title>Successful Logons (4624)</title>
+      <single>
+        <search>
+          <query>index=win10 sourcetype=WinEventLog:Security EventCode=4624 earliest=$time.earliest$ latest=$time.latest$ | stats count as success_logons</query>
+        </search>
+      </single>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Events Over Time</title>
+      <chart>
+        <search>
+          <query>index=win10 earliest=$time.earliest$ latest=$time.latest$ | timechart span=15m count</query>
+        </search>
+        <option name="charting.chart">line</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Top Sourcetypes</title>
+      <chart>
+        <search>
+          <query>index=win10 earliest=$time.earliest$ latest=$time.latest$ | stats count by sourcetype | sort -count | head 10</query>
+        </search>
+        <option name="charting.chart">bar</option>
+      </chart>
+    </panel>
+
+    <panel>
+      <title>Top Failed Logon Source IPs</title>
+      <chart>
+        <search>
+          <query>index=win10 sourcetype=WinEventLog:Security EventCode=4625 earliest=$time.earliest$ latest=$time.latest$ | eval src=coalesce(Source_Network_Address, IpAddress, src_ip, "unknown") | stats count as fails by src | sort -fails | head 10</query>
+        </search>
+        <option name="charting.chart">bar</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Top Successful Logons by User</title>
+      <chart>
+        <search>
+          <query>index=win10 sourcetype=WinEventLog:Security EventCode=4624 earliest=$time.earliest$ latest=$time.latest$ | eval user=coalesce(Account_Name, TargetUserName, user, "unknown") | stats count as logons by user | sort -logons | head 10</query>
+        </search>
+        <option name="charting.chart">bar</option>
+      </chart>
+    </panel>
+
+    <panel>
+      <title>Top Sysmon Process Images (Event ID 1)</title>
+      <chart>
+        <search>
+          <query>index=win10 sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 earliest=$time.earliest$ latest=$time.latest$ | stats count as executions by Image | sort -executions | head 10</query>
+        </search>
+        <option name="charting.chart">bar</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Top Sysmon Destinations (Event ID 3)</title>
+      <chart>
+        <search>
+          <query>index=win10 sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=3 earliest=$time.earliest$ latest=$time.latest$ | eval dest=coalesce(DestinationIp, dest_ip, DestinationIP, "unknown") | stats count as connections by dest | sort -connections | head 10</query>
+        </search>
+        <option name="charting.chart">bar</option>
+      </chart>
+    </panel>
+
+    <panel>
+      <title>PowerShell / pwsh Executions (Hunt)</title>
+      <table>
+        <search>
+          <query>index=win10 earliest=$time.earliest$ latest=$time.latest$ ((sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1) OR (sourcetype=WinEventLog:Security EventCode=4688)) (powershell OR pwsh) | table _time host User Account_Name Image New_Process_Name CommandLine Process_Command_Line ParentImage Parent_Process_Name | sort - _time | head 50</query>
+        </search>
+      </table>
+    </panel>
+  </row>
+</dashboard>
